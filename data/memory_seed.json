@@ -1,0 +1,83 @@
+[
+  {
+    "id": "m001",
+    "q_i": "answerability_gate",
+    "v_i": "Many failures are not language failures. They happen because the system speaks before its internal structure has converged, producing fluent but unverifiable statements.",
+    "c_i": 0.6,
+    "s_i": -0.7,
+    "eta_i": {
+      "tags": ["seed", "warning"],
+      "role": "avoid_path",
+      "note": "discourage premature generation"
+    }
+  },
+  {
+    "id": "m002",
+    "q_i": "reasoning_redefinition",
+    "v_i": "Reasoning should be treated as driving the internal state toward a stably expressible region. Language generation is only the final projection step after the gate is passed.",
+    "c_i": 0.7,
+    "s_i": 0.85,
+    "eta_i": {
+      "tags": ["seed", "principle"],
+      "role": "support_path"
+    }
+  },
+  {
+    "id": "m003",
+    "q_i": "state_definition",
+    "v_i": "The system state should contain the query and a finite set of candidate memories, but it should not contain an answer string, because an early answer biases subsequent structure building.",
+    "c_i": 0.7,
+    "s_i": 0.9,
+    "eta_i": {
+      "tags": ["seed", "principle"],
+      "claim_key": "answer_in_state",
+      "polarity": -1
+    }
+  },
+  {
+    "id": "m004",
+    "q_i": "state_definition",
+    "v_i": "Keeping a tentative answer inside the state can sometimes stabilize the search by giving a concrete anchor for refinement and critique.",
+    "c_i": 0.6,
+    "s_i": 0.55,
+    "eta_i": {
+      "tags": ["seed", "claim", "conflict_demo"],
+      "claim_key": "answer_in_state",
+      "polarity": 1
+    }
+  },
+  {
+    "id": "m005",
+    "q_i": "conflict_handling",
+    "v_i": "When two memories pull the system in opposite directions, the safest move is often not deletion but adding a higher-level constraint that explains when each applies.",
+    "c_i": 0.6,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": ["seed", "strategy"],
+      "role": "rewrite_hint",
+      "kind": "constraint_template"
+    }
+  },
+  {
+    "id": "m006",
+    "q_i": "rewrite_operator",
+    "v_i": "A good rewrite is not a final answer. It can be a bridge, a condition, or a compressed abstraction that makes the overall structure less risky to express.",
+    "c_i": 0.6,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": ["seed", "strategy"],
+      "role": "rewrite_hint"
+    }
+  },
+  {
+    "id": "m007",
+    "q_i": "directional_weight",
+    "v_i": "A memory's directional weight is not about truth. It is about whether activating this memory tends to move the system toward a stable, expressible state in past runs.",
+    "c_i": 0.5,
+    "s_i": 0.85,
+    "eta_i": {
+      "tags": ["seed", "principle"],
+      "role": "valence_semantics"
+    }
+  }
+]
