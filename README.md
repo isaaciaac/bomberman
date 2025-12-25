@@ -11,7 +11,7 @@ The core idea is: reasoning is treated as driving an internal state into a regio
 Requirements: Python 3.11+ and `numpy`.
 
 ```bash
-pip install numpy
+python -m pip install -r requirements.txt
 python -m entropy_demo.cli --query "should state contain an answer string" --k 2 --epsilon 0.35 --tmax 6
 ```
 
@@ -61,6 +61,10 @@ Conflict mediation:
 python -m unittest discover -s tests
 ```
 
+### License
+
+Apache-2.0 (see `LICENSE`).
+
 ---
 
 ## 中文
@@ -74,7 +78,7 @@ python -m unittest discover -s tests
 依赖：Python 3.11+ 与 `numpy`。
 
 ```bash
-pip install numpy
+python -m pip install -r requirements.txt
 python -m entropy_demo.cli --query "should state contain an answer string" --k 2 --epsilon 0.35 --tmax 6
 ```
 
@@ -123,3 +127,7 @@ python -m entropy_demo.cli --query "should state contain an answer string" --k 2
 ```bash
 python -m unittest discover -s tests
 ```
+
+### 许可
+
+Apache-2.0（见 `LICENSE`）。
