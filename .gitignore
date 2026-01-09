@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .run/
 .venv/
+ark_api_key.txt
+paper/main.tex

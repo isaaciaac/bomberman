@@ -1,13 +1,16 @@
-"""S2 rewrite proposals that monotonically extend M and strictly decrease entropy."""
+"""S2 rewrite proposals (REWRITE) that monotonically extend M and strictly decrease entropy."""
 
 from __future__ import annotations
 
 import itertools
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Sequence
 
 import numpy as np
 
+from .config import EntropyConfig, RewriteConfig, StabilityConfig
 from .embedding import cos, embed_average, embed_text
 from .entropy import EntropyBreakdown, EntropyWeights, HistoryStore, compute_entropy
 from .types import MemoryAtom, is_constraint_atom
@@ -31,14 +34,17 @@ class RewriteProposal:
     delta: list[MemoryAtom]
 
 
-def _candidate_bridge(q: str, *, z_q: np.ndarray, factory: AtomFactory) -> RewriteProposal:
+def _candidate_bridge(q: str, *, z_q: np.ndarray, factory: AtomFactory, cfg: RewriteConfig) -> RewriteProposal:
+    v_i = f"BRIDGE: restate query -> {q}"
+    dim = int(z_q.shape[0])
+    z_i = z_q.copy() if cfg.bridge_embedding == "from_q" else embed_text(v_i, dim=dim)
     atom = MemoryAtom(
         id=factory.new_id("bridge"),
         q_i=q,
-        v_i=f"BRIDGE: restate query -> {q}",
-        z_i=z_q.copy(),
-        c_i=0.1,
-        s_i=0.6,
+        v_i=v_i,
+        z_i=z_i,
+        c_i=cfg.bridge_cost,
+        s_i=cfg.bridge_valence,
         eta_i={"rewrite_type": "bridge"},
     )
     return RewriteProposal(kind="bridge", delta=[atom])
@@ -50,7 +56,7 @@ def _candidate_constraint(
     z_q: np.ndarray,
     M: Sequence[MemoryAtom],
     factory: AtomFactory,
-    max_pairs: int = 3,
+    cfg: RewriteConfig,
 ) -> RewriteProposal | None:
     from .entropy import chi
 
@@ -63,16 +69,17 @@ def _candidate_constraint(
     if not conflicts:
         return None
 
-    chosen = conflicts[:max_pairs]
+    chosen = conflicts[: cfg.constraint_max_pairs]
+    v_i = "CONSTRAINT: reconcile conflicting pair(s)"
+    dim = int(z_q.shape[0])
+    z_i = z_q.copy() if cfg.constraint_embedding == "from_q" else embed_text(v_i, dim=dim)
     atom = MemoryAtom(
         id=factory.new_id("constraint"),
         q_i=q,
-        v_i="CONSTRAINT: reconcile conflicting pair(s)",
-        # Use the query embedding so this candidate mediates conflict without
-        # worsening coverage; in conflict-free cases the bridge candidate wins.
-        z_i=z_q.copy(),
-        c_i=0.05,
-        s_i=0.3,
+        v_i=v_i,
+        z_i=z_i,
+        c_i=cfg.constraint_cost,
+        s_i=cfg.constraint_valence,
         eta_i={"rewrite_type": "constraint", "reconcile_pairs": [list(p) for p in chosen]},
     )
     return RewriteProposal(kind="constraint", delta=[atom])
@@ -83,7 +90,7 @@ def _candidate_abstraction(
     *,
     M: Sequence[MemoryAtom],
     factory: AtomFactory,
-    similarity_threshold: float = 0.8,
+    cfg: RewriteConfig,
 ) -> RewriteProposal | None:
     candidates = [m for m in M if not is_constraint_atom(m)]
     if len(candidates) < 2:
@@ -97,19 +104,23 @@ def _candidate_abstraction(
             best_sim = sim
             best_pair = (a, b)
 
-    if best_pair is None or best_sim < similarity_threshold:
+    if best_pair is None or best_sim < cfg.abstraction_similarity_threshold:
         return None
 
     a, b = best_pair
-    z_abs = embed_average([a.z_i, b.z_i])
+    v_i = f"ABSTRACT: combine {a.id} + {b.id}"
+    if cfg.abstraction_embedding == "from_v":
+        z_abs = embed_text(v_i, dim=int(a.z_i.shape[0]))
+    else:
+        z_abs = embed_average([a.z_i, b.z_i])
     sum_cost = float(a.c_i + b.c_i)
     atom = MemoryAtom(
         id=factory.new_id("abstract"),
         q_i=q,
-        v_i=f"ABSTRACT: {a.id}+{b.id} (sim={best_sim:.2f})",
+        v_i=v_i,
         z_i=z_abs,
-        c_i=min(0.5 * sum_cost, sum_cost),
-        s_i=0.5,
+        c_i=min(cfg.abstraction_cost_ratio * sum_cost, sum_cost),
+        s_i=cfg.abstraction_valence,
         eta_i={"rewrite_type": "abstraction", "subsumes": [a.id, b.id]},
     )
     return RewriteProposal(kind="abstraction", delta=[atom])
@@ -123,97 +134,113 @@ def propose_rewrite(
     entropy_before: EntropyBreakdown,
     history: HistoryStore,
     weights: EntropyWeights,
+    rewrite: RewriteConfig,
+    entropy_cfg: EntropyConfig,
+    stability_cfg: StabilityConfig,
     factory: AtomFactory,
 ) -> tuple[RewriteProposal, EntropyBreakdown] | None:
     """Try a few candidate DeltaM and pick the best strict descent."""
 
-    proposals: list[RewriteProposal] = []
-    proposals.append(_candidate_bridge(q, z_q=z_q, factory=factory))
-
-    maybe_constraint = _candidate_constraint(q, z_q=z_q, M=M, factory=factory)
-    if maybe_constraint is not None:
-        proposals.append(maybe_constraint)
-
-    maybe_abs = _candidate_abstraction(q, M=M, factory=factory)
-    if maybe_abs is not None:
-        proposals.append(maybe_abs)
+    ordered_kinds = _ordered_kinds(entropy_before, rewrite=rewrite)
+    evaluated = evaluate_rewrite_candidates(
+        q,
+        z_q=z_q,
+        M=M,
+        history=history,
+        weights=weights,
+        rewrite=rewrite,
+        entropy_cfg=entropy_cfg,
+        stability_cfg=stability_cfg,
+        factory=factory,
+        kinds=ordered_kinds,
+    )
 
     best: tuple[RewriteProposal, EntropyBreakdown] | None = None
-    for prop in proposals:
-        M2 = list(M) + list(prop.delta)
-        after = compute_entropy(q, z_q=z_q, M=M2, history=history, weights=weights)
+    for prop, after in evaluated:
         if after.total < entropy_before.total - 1e-12:
             if best is None or after.total < best[1].total:
                 best = (prop, after)
     return best
 
 
-def active_cost(memory_store: Sequence[MemoryAtom], *, s_min: float = 0.05) -> float:
-    """Approximate active memory cost used for the demo's folding heuristic."""
-
-    subsumed: set[str] = set()
-    for m in memory_store:
-        subsumes = m.eta_i.get("subsumes", [])
-        if isinstance(subsumes, list):
-            subsumed.update(str(x) for x in subsumes)
-
-    return float(
-        sum(
-            m.c_i
-            for m in memory_store
-            if m.id not in subsumed and max(0.0, float(m.s_i)) >= s_min
-        )
-    )
+def _load_templates(path: Path) -> dict[str, list[str]]:
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, list[str]] = {}
+    for k, v in raw.items():
+        if isinstance(k, str) and isinstance(v, list) and all(isinstance(x, str) for x in v):
+            out[k] = list(v)
+    return out
 
 
-def soft_fold_if_over_budget(
-    memory_store: list[MemoryAtom],
+def _bucket(entropy: EntropyBreakdown) -> str:
+    parts = {"cov": entropy.E_cov, "conf": entropy.E_conf, "stab": entropy.E_stab}
+    dominant = max(parts, key=parts.get)
+    return f"dominant_{dominant}"
+
+
+def _ordered_kinds(entropy: EntropyBreakdown, *, rewrite: RewriteConfig) -> list[str]:
+    enabled = set(rewrite.enabled_kinds)
+    templates = _load_templates(rewrite.template_path) if rewrite.mode == "template_then_search" else {}
+    order = templates.get(_bucket(entropy), list(rewrite.enabled_kinds))
+
+    ordered_kinds = [k for k in order if k in enabled]
+    for k in rewrite.enabled_kinds:
+        if k in enabled and k not in ordered_kinds:
+            ordered_kinds.append(k)
+    return ordered_kinds
+
+
+def evaluate_rewrite_candidates(
+    q: str,
     *,
-    c_max: float,
+    z_q: np.ndarray,
+    M: Sequence[MemoryAtom],
+    history: HistoryStore,
+    weights: EntropyWeights,
+    rewrite: RewriteConfig,
+    entropy_cfg: EntropyConfig,
+    stability_cfg: StabilityConfig,
     factory: AtomFactory,
-) -> MemoryAtom | None:
-    """Soft folding: add an abstraction atom without mutating existing atoms.
+    kinds: Sequence[str] | None = None,
+) -> list[tuple[RewriteProposal, EntropyBreakdown]]:
+    """Generate and score candidate rewrites, returning (proposal, entropy_after)."""
 
-    Demo approximation:
-    - No deletion.
-    - No in-place modification of existing atoms.
-    - Budget is enforced by treating atoms referenced by an `ABSTRACT:` atom's
-      `eta_i.subsumes` list as inactive for cost accounting.
-    """
+    enabled = set(rewrite.enabled_kinds)
+    ordered = list(kinds) if kinds is not None else list(rewrite.enabled_kinds)
+    ordered = [k for k in ordered if k in enabled]
 
-    if active_cost(memory_store) <= c_max:
-        return None
+    proposals: list[RewriteProposal] = []
+    for kind in ordered:
+        if kind == "bridge":
+            proposals.append(_candidate_bridge(q, z_q=z_q, factory=factory, cfg=rewrite))
+        elif kind == "constraint":
+            maybe_constraint = _candidate_constraint(q, z_q=z_q, M=M, factory=factory, cfg=rewrite)
+            if maybe_constraint is not None:
+                proposals.append(maybe_constraint)
+        elif kind == "abstraction":
+            maybe_abs = _candidate_abstraction(q, M=M, factory=factory, cfg=rewrite)
+            if maybe_abs is not None:
+                proposals.append(maybe_abs)
 
-    subsumed: set[str] = set()
-    for m in memory_store:
-        subsumes = m.eta_i.get("subsumes", [])
-        if isinstance(subsumes, list):
-            subsumed.update(str(x) for x in subsumes)
-
-    candidates = [
-        m
-        for m in memory_store
-        if not is_constraint_atom(m)
-        and max(0.0, float(m.s_i)) >= 0.05
-        and m.id not in subsumed
-    ]
-    if len(candidates) < 2:
-        return None
-
-    candidates.sort(key=lambda m: float(m.s_i))
-    a, b = candidates[0], candidates[1]
-
-    z_abs = embed_average([a.z_i, b.z_i])
-    sum_cost = float(a.c_i + b.c_i)
-    new_atom = MemoryAtom(
-        id=factory.new_id("fold"),
-        q_i="folding",
-        v_i=f"ABSTRACT: fold {a.id}+{b.id} (budget)",
-        z_i=z_abs,
-        c_i=min(0.25 * sum_cost, sum_cost),
-        s_i=0.4,
-        eta_i={"rewrite_type": "fold", "subsumes": [a.id, b.id]},
-    )
-
-    memory_store.append(new_atom)
-    return new_atom
+    evaluated: list[tuple[RewriteProposal, EntropyBreakdown]] = []
+    for prop in proposals:
+        M2 = list(M) + list(prop.delta)
+        after = compute_entropy(
+            q,
+            z_q=z_q,
+            M=M2,
+            history=history,
+            weights=weights,
+            coverage_clip_cosine=entropy_cfg.coverage_clip_cosine,
+            conflict_include_constraints=entropy_cfg.conflict_include_constraints,
+            cluster_tokens=stability_cfg.cluster_tokens,
+        )
+        evaluated.append((prop, after))
+    return evaluated

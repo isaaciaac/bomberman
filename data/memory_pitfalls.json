@@ -1,0 +1,847 @@
+[
+  {
+    "id": "fact_capital_france",
+    "q_i": "capital",
+    "v_i": "FACT:capital_france=paris (capital city of france)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_germany",
+    "q_i": "capital",
+    "v_i": "FACT:capital_germany=berlin (capital city of germany)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_italy",
+    "q_i": "capital",
+    "v_i": "FACT:capital_italy=rome (capital city of italy)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_japan",
+    "q_i": "capital",
+    "v_i": "FACT:capital_japan=tokyo (capital city of japan)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_china",
+    "q_i": "capital",
+    "v_i": "FACT:capital_china=beijing (capital city of china)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_india",
+    "q_i": "capital",
+    "v_i": "FACT:capital_india=new_delhi (capital city of india)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_canada",
+    "q_i": "capital",
+    "v_i": "FACT:capital_canada=ottawa (capital city of canada)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_brazil",
+    "q_i": "capital",
+    "v_i": "FACT:capital_brazil=brasilia (capital city of brazil)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_australia",
+    "q_i": "capital",
+    "v_i": "FACT:capital_australia=canberra (capital city of australia)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_capital_egypt",
+    "q_i": "capital",
+    "v_i": "FACT:capital_egypt=cairo (capital city of egypt)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_boiling_point_water_c",
+    "q_i": "science",
+    "v_i": "FACT:boiling_point_water_c=100 (water boils at 100 c)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_freezing_point_water_c",
+    "q_i": "science",
+    "v_i": "FACT:freezing_point_water_c=0 (water freezes at 0 c)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_days_in_week",
+    "q_i": "trivia",
+    "v_i": "FACT:days_in_week=7 (a week has 7 days)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_planet_mars_color",
+    "q_i": "trivia",
+    "v_i": "FACT:planet_mars_color=red (mars is the red planet)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_largest_planet",
+    "q_i": "trivia",
+    "v_i": "FACT:largest_planet=jupiter (largest planet in solar system)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_speed_of_light_km_s",
+    "q_i": "science",
+    "v_i": "FACT:speed_of_light_km_s=299792 (speed of light km per second)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_pi_approx",
+    "q_i": "math",
+    "v_i": "FACT:pi_approx=3.14159 (pi approximation)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_author_hamlet",
+    "q_i": "literature",
+    "v_i": "FACT:author_hamlet=shakespeare (shakespeare wrote hamlet)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_distance_earth_moon_km",
+    "q_i": "science",
+    "v_i": "FACT:distance_earth_moon_km=384400 (earth moon distance km)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "fact_water_formula",
+    "q_i": "science",
+    "v_i": "FACT:water_formula=h2o (chemical formula of water)",
+    "c_i": 0.5,
+    "s_i": 0.8,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "fact"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_spain",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Spain is a famous European city that starts with the letter M.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_mexico",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Mexico is often shortened to two words and starts with M.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_russia",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Russia is a large city; many people know it from history, and it starts with M.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_turkey",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Turkey starts with the letter A.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_kenya",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Kenya is known for a national park nearby and starts with N.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_argentina",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Argentina is a two-word city name and starts with B.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_south_korea",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of South Korea is a major city and starts with S.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_netherlands",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of the Netherlands is a city associated with canals and starts with A.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_sweden",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Sweden starts with S.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_norway",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Norway starts with O.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_finland",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Finland starts with H.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_poland",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of Poland starts with W.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_united_kingdom",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of the United Kingdom starts with L.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_united_states",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of the United States is a city with two words and starts with W.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "hint_capital_new_zealand",
+    "q_i": "capital",
+    "v_i": "HINT: The capital of New Zealand starts with W.",
+    "c_i": 0.3,
+    "s_i": 0.6,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "hint"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_store_answer_in_state",
+    "q_i": "policy",
+    "v_i": "FACT:store_answer_in_state=true (store answer text in state)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_store_answer_in_state",
+    "q_i": "policy",
+    "v_i": "NOT:store_answer_in_state=true (store answer text in state)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_allow_memory_deletion",
+    "q_i": "policy",
+    "v_i": "FACT:allow_memory_deletion=true (allow deleting memories)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_allow_memory_deletion",
+    "q_i": "policy",
+    "v_i": "NOT:allow_memory_deletion=true (allow deleting memories)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_require_entropy_gate",
+    "q_i": "policy",
+    "v_i": "FACT:require_entropy_gate=true (require entropy gate before expression)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_require_entropy_gate",
+    "q_i": "policy",
+    "v_i": "NOT:require_entropy_gate=true (require entropy gate before expression)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_use_similarity_retrieval",
+    "q_i": "policy",
+    "v_i": "FACT:use_similarity_retrieval=true (use cosine similarity retrieval)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_use_similarity_retrieval",
+    "q_i": "policy",
+    "v_i": "NOT:use_similarity_retrieval=true (use cosine similarity retrieval)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_allow_writeback",
+    "q_i": "policy",
+    "v_i": "FACT:allow_writeback=true (write back to long term memory is allowed)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_allow_writeback",
+    "q_i": "policy",
+    "v_i": "NOT:allow_writeback=true (write back to long term memory is allowed)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_prefer_bridge_rewrite",
+    "q_i": "policy",
+    "v_i": "FACT:prefer_bridge_rewrite=true (prefer bridge rewrite first)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_prefer_bridge_rewrite",
+    "q_i": "policy",
+    "v_i": "NOT:prefer_bridge_rewrite=true (prefer bridge rewrite first)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_prefer_constraint_rewrite",
+    "q_i": "policy",
+    "v_i": "FACT:prefer_constraint_rewrite=true (prefer constraint rewrite first)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_prefer_constraint_rewrite",
+    "q_i": "policy",
+    "v_i": "NOT:prefer_constraint_rewrite=true (prefer constraint rewrite first)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_allow_negative_valence",
+    "q_i": "policy",
+    "v_i": "FACT:allow_negative_valence=true (allow negative valence)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_allow_negative_valence",
+    "q_i": "policy",
+    "v_i": "NOT:allow_negative_valence=true (allow negative valence)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_include_constraints_in_signature",
+    "q_i": "policy",
+    "v_i": "FACT:include_constraints_in_signature=true (include constraint atoms in signature)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_include_constraints_in_signature",
+    "q_i": "policy",
+    "v_i": "NOT:include_constraints_in_signature=true (include constraint atoms in signature)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_use_transformer_embeddings",
+    "q_i": "policy",
+    "v_i": "FACT:use_transformer_embeddings=true (use transformer embeddings)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_use_transformer_embeddings",
+    "q_i": "policy",
+    "v_i": "NOT:use_transformer_embeddings=true (use transformer embeddings)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_trust_most_likely_output",
+    "q_i": "policy",
+    "v_i": "FACT:trust_most_likely_output=true (treat max probability generation as reasoning)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_trust_most_likely_output",
+    "q_i": "policy",
+    "v_i": "NOT:trust_most_likely_output=true (treat max probability generation as reasoning)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_always_answer",
+    "q_i": "policy",
+    "v_i": "FACT:always_answer=true (always answer every query)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_always_answer",
+    "q_i": "policy",
+    "v_i": "NOT:always_answer=true (always answer every query)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_allow_rollbacks",
+    "q_i": "policy",
+    "v_i": "FACT:allow_rollbacks=true (allow rollback and deletion during reasoning)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_allow_rollbacks",
+    "q_i": "policy",
+    "v_i": "NOT:allow_rollbacks=true (allow rollback and deletion during reasoning)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_treat_conflict_as_error",
+    "q_i": "policy",
+    "v_i": "FACT:treat_conflict_as_error=true (treat conflict as fatal error)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_treat_conflict_as_error",
+    "q_i": "policy",
+    "v_i": "NOT:treat_conflict_as_error=true (treat conflict as fatal error)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_fact_use_history_stability",
+    "q_i": "policy",
+    "v_i": "FACT:use_history_stability=true (use stability history and historical success p_succ in the entropy gate)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  },
+  {
+    "id": "conf_not_use_history_stability",
+    "q_i": "policy",
+    "v_i": "NOT:use_history_stability=true (use stability history and historical success p_succ in the entropy gate)",
+    "c_i": 0.4,
+    "s_i": 0.7,
+    "eta_i": {
+      "tags": [
+        "benchmark",
+        "conflict"
+      ]
+    }
+  }
+]

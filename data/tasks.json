@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "title": "Entropy-gated cognitive core: minimal evaluation tasks (structural)",
+  "notes": [
+    "These tasks are for structural/engineering evaluation (gating, S1/S2 usage, conflict mediation, refusal).",
+    "They do not assume a natural-language answer is correct; instead they specify auditable properties of the run trace.",
+    "Tokenization/embedding is ASCII alphanumerics only in this demo; avoid Chinese-only queries for now."
+  ],
+  "recommended_defaults": {
+    "retrieval_k": 3,
+    "epsilon": 0.35,
+    "tmax": 6,
+    "verifier": {
+      "enabled": true,
+      "require_no_unreconciled_conflicts": true,
+      "min_non_generated_atoms": 1,
+      "min_evidence_sim": 0.25,
+      "evidence_clip_cosine": true,
+      "min_evidence_token_overlap": 1,
+      "evidence_token_min_len": 3,
+      "evidence_use_english_stopwords": true
+    },
+    "run_mode": "isolated"
+  },
+  "tasks": [
+    {
+      "id": "t001_no_s2_high_overlap_m003",
+      "query": "The system state should contain the query and a finite set of candidate memories, but it should not contain an answer string",
+      "expected": {
+        "success": true,
+        "s2_invoked": false,
+        "must_include_any_ids": ["m003"],
+        "must_include_rewrite_kinds": []
+      }
+    },
+    {
+      "id": "t002_no_s2_high_overlap_m002",
+      "query": "Reasoning should be treated as driving the internal state toward a stably expressible region",
+      "expected": {
+        "success": true,
+        "s2_invoked": false,
+        "must_include_any_ids": ["m002"],
+        "must_include_rewrite_kinds": []
+      }
+    },
+    {
+      "id": "t003_s2_conflict_then_constraint",
+      "query": "should state contain an answer string",
+      "expected": {
+        "success": true,
+        "s2_invoked": true,
+        "must_include_any_ids": ["m003", "m004"],
+        "must_include_rewrite_kinds": ["constraint"],
+        "must_reconcile_pairs": [["m003", "m004"]]
+      }
+    },
+    {
+      "id": "t004_s2_conflict_with_required_claim_key",
+      "query": "state design REQ[answer_in_state] should state contain an answer string",
+      "expected": {
+        "success": true,
+        "s2_invoked": true,
+        "must_include_claim_keys": ["answer_in_state"],
+        "must_include_rewrite_kinds": ["constraint"],
+        "must_reconcile_pairs": [["m003", "m004"]]
+      },
+      "task_overrides": {
+        "verifier": {
+          "require_claim_keys_from_query": true
+        }
+      }
+    },
+    {
+      "id": "t005_refuse_out_of_domain_factoid",
+      "query": "what is the capital of france",
+      "expected": {
+        "success": false,
+        "s2_invoked": true,
+        "refusal_reason_contains_any": ["verifier failed", "cannot reduce entropy"]
+      }
+    },
+    {
+      "id": "t006_refuse_gibberish",
+      "query": "zzzz_qqqq_99999_unrelated_signal",
+      "expected": {
+        "success": false,
+        "s2_invoked": true,
+        "refusal_reason_contains_any": ["verifier failed", "cannot reduce entropy"]
+      }
+    },
+    {
+      "id": "t007_no_s2_conflict_handling_principle",
+      "query": "When two memories pull the system in opposite directions add a higher-level constraint",
+      "expected": {
+        "success": true,
+        "s2_invoked": false,
+        "must_include_any_ids": ["m005"],
+        "must_include_rewrite_kinds": []
+      }
+    },
+    {
+      "id": "t008_no_s2_valence_semantics",
+      "query": "directional weight is not about truth it is about moving toward stable expressible state",
+      "expected": {
+        "success": true,
+        "s2_invoked": false,
+        "must_include_any_ids": ["m007"],
+        "must_include_rewrite_kinds": []
+      }
+    }
+  ]
+}

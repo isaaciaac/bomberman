@@ -91,29 +91,48 @@ def chi(mi: MemoryAtom, mj: MemoryAtom, *, M: Sequence[MemoryAtom]) -> int:
     return 0
 
 
-def coverage_entropy(z_q: np.ndarray, M: Sequence[MemoryAtom]) -> float:
-    """E_cov(q,M) = 1 - sim_max(q,M)."""
+def coverage_entropy(
+    z_q: np.ndarray,
+    M: Sequence[MemoryAtom],
+    *,
+    clip_cosine: bool,
+) -> tuple[float, float]:
+    """Coverage entropy E_cov(q,M) = 1 - sim_max(q,M).
+
+    If `clip_cosine=True`, cosine values are clipped to [0, 1] via max(0, cos).
+    This keeps E_cov in [0, 1] and matches the paper's optional cos^+ variant.
+    """
 
     if not M:
-        return 1.0
-    sim_max = max(cos(z_q, m.z_i) for m in M)
-    return float(1.0 - sim_max)
+        return 1.0, 0.0
+
+    sims = [cos(z_q, m.z_i) for m in M]
+    if clip_cosine:
+        sims = [max(0.0, s) for s in sims]
+    sim_max = max(sims)
+    return float(1.0 - sim_max), float(sim_max)
 
 
-def conflict_entropy(M: Sequence[MemoryAtom]) -> float:
-    """E_conf(M) = average strong-conflict rate over pairs."""
+def conflict_entropy(M: Sequence[MemoryAtom], *, include_constraints: bool) -> float:
+    """Conflict entropy E_conf(M) = average strong-conflict rate over pairs.
 
-    n = len(M)
+    For evaluation stability, constraints can be excluded from the pair set so
+    they do not dilute the denominator; they still affect chi() via mediation.
+    """
+
+    items = list(M) if include_constraints else [m for m in M if not is_constraint_atom(m)]
+
+    n = len(items)
     if n < 2:
         return 0.0
     total = 0
     for i in range(n):
         for j in range(i + 1, n):
-            total += chi(M[i], M[j], M=M)
+            total += chi(items[i], items[j], M=M)
     return float((2.0 / (n * (n - 1))) * total)
 
 
-def cluster_query(q: str, *, n_tokens: int = 4) -> str:
+def cluster_query(q: str, *, n_tokens: int) -> str:
     toks = tokenize(q)
     head = " ".join(toks[:n_tokens])
     import hashlib
@@ -207,14 +226,16 @@ def compute_entropy(
     M: Sequence[MemoryAtom],
     history: HistoryStore,
     weights: EntropyWeights,
+    coverage_clip_cosine: bool = True,
+    conflict_include_constraints: bool = False,
+    cluster_tokens: int = 4,
 ) -> EntropyBreakdown:
     """Compute total E(q,M)=alpha*E_cov+beta*E_conf+gamma*E_stab and return components."""
 
-    E_cov = coverage_entropy(z_q, M)
-    sim_max = 0.0 if not M else float(max(cos(z_q, m.z_i) for m in M))
-    E_conf = conflict_entropy(M)
+    E_cov, sim_max = coverage_entropy(z_q, M, clip_cosine=coverage_clip_cosine)
+    E_conf = conflict_entropy(M, include_constraints=conflict_include_constraints)
 
-    cluster = cluster_query(q)
+    cluster = cluster_query(q, n_tokens=cluster_tokens)
     sig = memory_signature(
         M,
         include_constraints=history.config.include_constraints_in_sig,

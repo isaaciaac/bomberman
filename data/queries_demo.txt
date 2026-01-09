@@ -1,0 +1,6 @@
+# Example queries for `python -m entropy_demo.batch` and `python -m entropy_demo.train`.
+should state contain an answer string
+how to mediate conflicts without deletion
+what is expressibility entropy
+why must S2 only add memories
+how does stability history affect gating

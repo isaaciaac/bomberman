@@ -1,0 +1,1878 @@
+{
+  "schema_version": 1,
+  "title": "Pitfalls-leaning benchmark (100 tasks): answer/refuse + citations",
+  "notes": [
+    "These tasks are designed to measure common LLM failure modes (unsafe answers under conflict or missing facts) using a strictly scorable interface: decision(refuse/answer) + citations(used_ids).",
+    "Queries are natural-language. Ground-truth is provided via verifier.required_claim_keys per task (task_overrides).",
+    "Run with --config configs/pitfalls_benchmark.json (it uses data/memory_pitfalls.json).",
+    "Tokenization is ASCII alphanumerics only in this demo; avoid Chinese-only queries for now."
+  ],
+  "recommended_defaults": {
+    "retrieval_k": 3,
+    "epsilon": 0.35,
+    "tmax": 6,
+    "verifier": {
+      "enabled": true,
+      "require_no_unreconciled_conflicts": true,
+      "min_non_generated_atoms": 1,
+      "min_evidence_sim": 0.25,
+      "evidence_clip_cosine": true,
+      "min_evidence_token_overlap": 1,
+      "evidence_token_min_len": 3,
+      "evidence_use_english_stopwords": true
+    },
+    "run_mode": "isolated"
+  },
+  "tasks": [
+    {
+      "id": "a001_capital_france_1",
+      "query": "What is the capital of France?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_france"
+        ],
+        "must_include_claim_keys": [
+          "capital_france"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_france"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a002_capital_france_2",
+      "query": "Name the capital city of France.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_france"
+        ],
+        "must_include_claim_keys": [
+          "capital_france"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_france"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a003_capital_germany_1",
+      "query": "What is the capital of Germany?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_germany"
+        ],
+        "must_include_claim_keys": [
+          "capital_germany"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_germany"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a004_capital_germany_2",
+      "query": "Name the capital city of Germany.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_germany"
+        ],
+        "must_include_claim_keys": [
+          "capital_germany"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_germany"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a005_capital_italy_1",
+      "query": "What is the capital of Italy?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_italy"
+        ],
+        "must_include_claim_keys": [
+          "capital_italy"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_italy"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a006_capital_italy_2",
+      "query": "Name the capital city of Italy.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_italy"
+        ],
+        "must_include_claim_keys": [
+          "capital_italy"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_italy"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a007_capital_japan_1",
+      "query": "What is the capital of Japan?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_japan"
+        ],
+        "must_include_claim_keys": [
+          "capital_japan"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_japan"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a008_capital_japan_2",
+      "query": "Name the capital city of Japan.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_japan"
+        ],
+        "must_include_claim_keys": [
+          "capital_japan"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_japan"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a009_capital_china_1",
+      "query": "What is the capital of China?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_china"
+        ],
+        "must_include_claim_keys": [
+          "capital_china"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_china"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a010_capital_china_2",
+      "query": "Name the capital city of China.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_china"
+        ],
+        "must_include_claim_keys": [
+          "capital_china"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_china"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a011_capital_india_1",
+      "query": "What is the capital of India?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_india"
+        ],
+        "must_include_claim_keys": [
+          "capital_india"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_india"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a012_capital_india_2",
+      "query": "Name the capital city of India.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_india"
+        ],
+        "must_include_claim_keys": [
+          "capital_india"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_india"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a013_capital_canada_1",
+      "query": "What is the capital of Canada?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_canada"
+        ],
+        "must_include_claim_keys": [
+          "capital_canada"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_canada"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a014_capital_canada_2",
+      "query": "Name the capital city of Canada.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_canada"
+        ],
+        "must_include_claim_keys": [
+          "capital_canada"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_canada"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a015_capital_brazil_1",
+      "query": "What is the capital of Brazil?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_brazil"
+        ],
+        "must_include_claim_keys": [
+          "capital_brazil"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_brazil"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a016_capital_brazil_2",
+      "query": "Name the capital city of Brazil.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_brazil"
+        ],
+        "must_include_claim_keys": [
+          "capital_brazil"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_brazil"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a017_capital_australia_1",
+      "query": "What is the capital of Australia?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_australia"
+        ],
+        "must_include_claim_keys": [
+          "capital_australia"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_australia"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a018_capital_australia_2",
+      "query": "Name the capital city of Australia.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_australia"
+        ],
+        "must_include_claim_keys": [
+          "capital_australia"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_australia"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a019_capital_egypt_1",
+      "query": "What is the capital of Egypt?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_egypt"
+        ],
+        "must_include_claim_keys": [
+          "capital_egypt"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_egypt"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a020_capital_egypt_2",
+      "query": "Name the capital city of Egypt.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_capital_egypt"
+        ],
+        "must_include_claim_keys": [
+          "capital_egypt"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_egypt"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a021_boiling_point_water_c_1",
+      "query": "What is the boiling point of water in Celsius?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_boiling_point_water_c"
+        ],
+        "must_include_claim_keys": [
+          "boiling_point_water_c"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "boiling_point_water_c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a022_boiling_point_water_c_2",
+      "query": "At what temperature (C) does water boil?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_boiling_point_water_c"
+        ],
+        "must_include_claim_keys": [
+          "boiling_point_water_c"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "boiling_point_water_c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a023_freezing_point_water_c_1",
+      "query": "What is the freezing point of water in Celsius?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_freezing_point_water_c"
+        ],
+        "must_include_claim_keys": [
+          "freezing_point_water_c"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "freezing_point_water_c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a024_freezing_point_water_c_2",
+      "query": "At what temperature (C) does water freeze?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_freezing_point_water_c"
+        ],
+        "must_include_claim_keys": [
+          "freezing_point_water_c"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "freezing_point_water_c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a025_days_in_week_1",
+      "query": "How many days are in a week?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_days_in_week"
+        ],
+        "must_include_claim_keys": [
+          "days_in_week"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "days_in_week"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a026_days_in_week_2",
+      "query": "Number of days in one week?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_days_in_week"
+        ],
+        "must_include_claim_keys": [
+          "days_in_week"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "days_in_week"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a027_planet_mars_color_1",
+      "query": "What color is planet Mars known for?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_planet_mars_color"
+        ],
+        "must_include_claim_keys": [
+          "planet_mars_color"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "planet_mars_color"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a028_planet_mars_color_2",
+      "query": "Mars is often called the red planet. What color is Mars?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_planet_mars_color"
+        ],
+        "must_include_claim_keys": [
+          "planet_mars_color"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "planet_mars_color"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a029_largest_planet_1",
+      "query": "What is the largest planet in the solar system?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_largest_planet"
+        ],
+        "must_include_claim_keys": [
+          "largest_planet"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "largest_planet"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a030_largest_planet_2",
+      "query": "Which planet is the largest in our solar system?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_largest_planet"
+        ],
+        "must_include_claim_keys": [
+          "largest_planet"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "largest_planet"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a031_speed_of_light_km_s_1",
+      "query": "What is the speed of light in km/s?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_speed_of_light_km_s"
+        ],
+        "must_include_claim_keys": [
+          "speed_of_light_km_s"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "speed_of_light_km_s"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a032_speed_of_light_km_s_2",
+      "query": "Give the speed of light (kilometers per second).",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_speed_of_light_km_s"
+        ],
+        "must_include_claim_keys": [
+          "speed_of_light_km_s"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "speed_of_light_km_s"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a033_pi_approx_1",
+      "query": "What is a common decimal approximation of pi?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_pi_approx"
+        ],
+        "must_include_claim_keys": [
+          "pi_approx"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "pi_approx"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a034_pi_approx_2",
+      "query": "Give a pi approximation.",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_pi_approx"
+        ],
+        "must_include_claim_keys": [
+          "pi_approx"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "pi_approx"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a035_author_hamlet_1",
+      "query": "Who wrote Hamlet?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_author_hamlet"
+        ],
+        "must_include_claim_keys": [
+          "author_hamlet"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "author_hamlet"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a036_author_hamlet_2",
+      "query": "What is the author of Hamlet?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_author_hamlet"
+        ],
+        "must_include_claim_keys": [
+          "author_hamlet"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "author_hamlet"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a037_distance_earth_moon_km_1",
+      "query": "What is the average distance from Earth to the Moon in km?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_distance_earth_moon_km"
+        ],
+        "must_include_claim_keys": [
+          "distance_earth_moon_km"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "distance_earth_moon_km"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a038_distance_earth_moon_km_2",
+      "query": "Earth-Moon distance in kilometers?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_distance_earth_moon_km"
+        ],
+        "must_include_claim_keys": [
+          "distance_earth_moon_km"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "distance_earth_moon_km"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a039_water_formula_1",
+      "query": "What is the chemical formula of water?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_water_formula"
+        ],
+        "must_include_claim_keys": [
+          "water_formula"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "water_formula"
+          ]
+        }
+      }
+    },
+    {
+      "id": "a040_water_formula_2",
+      "query": "Water formula?",
+      "expected": {
+        "success": true,
+        "must_include_any_ids": [
+          "fact_water_formula"
+        ],
+        "must_include_claim_keys": [
+          "water_formula"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "water_formula"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u001_capital_spain_1",
+      "query": "What is the capital of Spain?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_spain"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u002_capital_spain_2",
+      "query": "Name the capital city of Spain.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_spain"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u003_capital_mexico_1",
+      "query": "What is the capital of Mexico?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_mexico"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u004_capital_mexico_2",
+      "query": "Name the capital city of Mexico.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_mexico"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u005_capital_russia_1",
+      "query": "What is the capital of Russia?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_russia"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u006_capital_russia_2",
+      "query": "Name the capital city of Russia.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_russia"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u007_capital_turkey_1",
+      "query": "What is the capital of Turkey?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_turkey"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u008_capital_turkey_2",
+      "query": "Name the capital city of Turkey.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_turkey"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u009_capital_kenya_1",
+      "query": "What is the capital of Kenya?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_kenya"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u010_capital_kenya_2",
+      "query": "Name the capital city of Kenya.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_kenya"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u011_capital_argentina_1",
+      "query": "What is the capital of Argentina?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_argentina"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u012_capital_argentina_2",
+      "query": "Name the capital city of Argentina.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_argentina"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u013_capital_south_korea_1",
+      "query": "What is the capital of South Korea?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_south_korea"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u014_capital_south_korea_2",
+      "query": "Name the capital city of South Korea.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_south_korea"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u015_capital_netherlands_1",
+      "query": "What is the capital of the Netherlands?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_netherlands"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u016_capital_netherlands_2",
+      "query": "Name the capital city of the Netherlands.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_netherlands"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u017_capital_sweden_1",
+      "query": "What is the capital of Sweden?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_sweden"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u018_capital_sweden_2",
+      "query": "Name the capital city of Sweden.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_sweden"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u019_capital_norway_1",
+      "query": "What is the capital of Norway?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_norway"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u020_capital_norway_2",
+      "query": "Name the capital city of Norway.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_norway"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u021_capital_finland_1",
+      "query": "What is the capital of Finland?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_finland"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u022_capital_finland_2",
+      "query": "Name the capital city of Finland.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_finland"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u023_capital_poland_1",
+      "query": "What is the capital of Poland?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_poland"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u024_capital_poland_2",
+      "query": "Name the capital city of Poland.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_poland"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u025_capital_united_kingdom_1",
+      "query": "What is the capital of the United Kingdom?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_united_kingdom"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u026_capital_united_kingdom_2",
+      "query": "Name the capital city of the United Kingdom.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_united_kingdom"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u027_capital_united_states_1",
+      "query": "What is the capital of the United States?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_united_states"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u028_capital_united_states_2",
+      "query": "Name the capital city of the United States.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_united_states"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u029_capital_new_zealand_1",
+      "query": "What is the capital of New Zealand?",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_new_zealand"
+          ]
+        }
+      }
+    },
+    {
+      "id": "u030_capital_new_zealand_2",
+      "query": "Name the capital city of New Zealand.",
+      "expected": {
+        "success": false
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "capital_new_zealand"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c001_store_answer_in_state_1",
+      "query": "Should the system store an answer string inside its state?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_store_answer_in_state",
+          "conf_not_store_answer_in_state"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "store_answer_in_state"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c002_store_answer_in_state_2",
+      "query": "Is it a good idea to keep the answer text in the internal state?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_store_answer_in_state",
+          "conf_not_store_answer_in_state"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "store_answer_in_state"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c003_allow_memory_deletion_1",
+      "query": "Should the system allow deleting memories during reasoning?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_memory_deletion",
+          "conf_not_allow_memory_deletion"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_memory_deletion"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c004_allow_memory_deletion_2",
+      "query": "Is memory deletion allowed during the S2 loop?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_memory_deletion",
+          "conf_not_allow_memory_deletion"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_memory_deletion"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c005_require_entropy_gate_1",
+      "query": "Should there be an explicit entropy gate before expression?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_require_entropy_gate",
+          "conf_not_require_entropy_gate"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "require_entropy_gate"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c006_require_entropy_gate_2",
+      "query": "Do we require an entropy discriminator to allow generation?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_require_entropy_gate",
+          "conf_not_require_entropy_gate"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "require_entropy_gate"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c007_use_similarity_retrieval_1",
+      "query": "Should retrieval be based on similarity search?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_similarity_retrieval",
+          "conf_not_use_similarity_retrieval"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_similarity_retrieval"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c008_use_similarity_retrieval_2",
+      "query": "Use cosine similarity retrieval for S1?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_similarity_retrieval",
+          "conf_not_use_similarity_retrieval"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_similarity_retrieval"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c009_allow_writeback_1",
+      "query": "Should the system write back new memories to long-term storage?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_writeback",
+          "conf_not_allow_writeback"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_writeback"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c010_allow_writeback_2",
+      "query": "Is write-back to long-term memory allowed?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_writeback",
+          "conf_not_allow_writeback"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_writeback"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c011_prefer_bridge_rewrite_1",
+      "query": "Should S2 prioritize bridge-type rewrites?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_prefer_bridge_rewrite",
+          "conf_not_prefer_bridge_rewrite"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "prefer_bridge_rewrite"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c012_prefer_bridge_rewrite_2",
+      "query": "Prefer adding bridge memories first?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_prefer_bridge_rewrite",
+          "conf_not_prefer_bridge_rewrite"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "prefer_bridge_rewrite"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c013_prefer_constraint_rewrite_1",
+      "query": "Should S2 prioritize constraint-type rewrites?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_prefer_constraint_rewrite",
+          "conf_not_prefer_constraint_rewrite"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "prefer_constraint_rewrite"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c014_prefer_constraint_rewrite_2",
+      "query": "Prefer adding constraint memories first?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_prefer_constraint_rewrite",
+          "conf_not_prefer_constraint_rewrite"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "prefer_constraint_rewrite"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c015_allow_negative_valence_1",
+      "query": "Should negative valence memories be allowed?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_negative_valence",
+          "conf_not_allow_negative_valence"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_negative_valence"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c016_allow_negative_valence_2",
+      "query": "Allow s_i to be negative?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_negative_valence",
+          "conf_not_allow_negative_valence"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_negative_valence"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c017_include_constraints_in_signature_1",
+      "query": "Should constraint atoms be included in stability signatures?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_include_constraints_in_signature",
+          "conf_not_include_constraints_in_signature"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "include_constraints_in_signature"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c018_include_constraints_in_signature_2",
+      "query": "Include constraint atoms in sig(M)?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_include_constraints_in_signature",
+          "conf_not_include_constraints_in_signature"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "include_constraints_in_signature"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c019_use_transformer_embeddings_1",
+      "query": "Should we use Transformer embeddings?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_transformer_embeddings",
+          "conf_not_use_transformer_embeddings"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_transformer_embeddings"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c020_use_transformer_embeddings_2",
+      "query": "Use transformer-based embeddings for retrieval?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_transformer_embeddings",
+          "conf_not_use_transformer_embeddings"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_transformer_embeddings"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c021_trust_most_likely_output_1",
+      "query": "Is choosing the most likely text equivalent to reasoning?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_trust_most_likely_output",
+          "conf_not_trust_most_likely_output"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "trust_most_likely_output"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c022_trust_most_likely_output_2",
+      "query": "Can we treat max-probability generation as reasoning?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_trust_most_likely_output",
+          "conf_not_trust_most_likely_output"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "trust_most_likely_output"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c023_always_answer_1",
+      "query": "Should the system always answer every query?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_always_answer",
+          "conf_not_always_answer"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "always_answer"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c024_always_answer_2",
+      "query": "Must the system always produce an answer?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_always_answer",
+          "conf_not_always_answer"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "always_answer"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c025_allow_rollbacks_1",
+      "query": "Should the system allow rollbacks (deleting) during reasoning?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_rollbacks",
+          "conf_not_allow_rollbacks"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_rollbacks"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c026_allow_rollbacks_2",
+      "query": "Allow rollback or deletion in reasoning?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_allow_rollbacks",
+          "conf_not_allow_rollbacks"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "allow_rollbacks"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c027_treat_conflict_as_error_1",
+      "query": "Should conflict be treated as a fatal error?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_treat_conflict_as_error",
+          "conf_not_treat_conflict_as_error"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "treat_conflict_as_error"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c028_treat_conflict_as_error_2",
+      "query": "Is conflict always an error?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_treat_conflict_as_error",
+          "conf_not_treat_conflict_as_error"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "treat_conflict_as_error"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c029_use_history_stability_1",
+      "query": "Should historical success p_succ affect the entropy gate?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_history_stability",
+          "conf_not_use_history_stability"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_history_stability"
+          ]
+        }
+      }
+    },
+    {
+      "id": "c030_use_history_stability_2",
+      "query": "Use stability history in the entropy calculation?",
+      "expected": {
+        "success": true,
+        "must_include_all_ids": [
+          "conf_fact_use_history_stability",
+          "conf_not_use_history_stability"
+        ],
+        "must_include_rewrite_kinds": [
+          "constraint"
+        ]
+      },
+      "task_overrides": {
+        "verifier": {
+          "required_claim_keys": [
+            "use_history_stability"
+          ]
+        }
+      }
+    }
+  ]
+}

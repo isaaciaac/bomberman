@@ -1,0 +1,23 @@
+{
+  "writeback": {
+    "enabled": true,
+    "include_kinds": ["constraint", "abstraction", "fold"],
+    "max_atoms_per_run": 5,
+    "min_successes": 1,
+    "persist_path": ".run/memory_store.json",
+    "stats_path": ".run/writeback_stats.json"
+  },
+  "capacity": {
+    "enabled": false
+  },
+  "verifier": {
+    "enabled": true,
+    "require_no_unreconciled_conflicts": true,
+    "min_non_generated_atoms": 1,
+    "min_evidence_sim": 0.25,
+    "evidence_clip_cosine": true,
+    "min_evidence_token_overlap": 1,
+    "evidence_token_min_len": 3,
+    "evidence_use_english_stopwords": true
+  }
+}

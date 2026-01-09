@@ -10,11 +10,91 @@ import numpy as np
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
+_EN_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "can",
+    "could",
+    "did",
+    "do",
+    "does",
+    "for",
+    "from",
+    "had",
+    "has",
+    "have",
+    "how",
+    "i",
+    "if",
+    "in",
+    "is",
+    "it",
+    "its",
+    "may",
+    "might",
+    "not",
+    "of",
+    "on",
+    "or",
+    "should",
+    "that",
+    "the",
+    "their",
+    "then",
+    "there",
+    "these",
+    "this",
+    "to",
+    "was",
+    "were",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+    "will",
+    "with",
+    "would",
+    # Structural markers commonly present in this demo's memory strings.
+    "fact",
+    "hint",
+    "true",
+    "false",
+}
 
-def tokenize(text: str) -> list[str]:
-    """Tokenize into lowercase alphanumerics."""
 
-    return _TOKEN_RE.findall(text.lower())
+def tokenize(
+    text: str,
+    *,
+    min_token_len: int = 1,
+    use_english_stopwords: bool = False,
+) -> list[str]:
+    """Tokenize into lowercase alphanumerics.
+
+    Optional filters are provided for engineering experiments. Defaults match
+    the original minimal spec (no filtering).
+    """
+
+    toks = _TOKEN_RE.findall(text.lower())
+    if min_token_len <= 1 and not use_english_stopwords:
+        return toks
+
+    out: list[str] = []
+    for t in toks:
+        if len(t) < min_token_len:
+            continue
+        if use_english_stopwords and t in _EN_STOPWORDS:
+            continue
+        out.append(t)
+    return out
 
 
 def _token_to_index_and_sign(token: str, dim: int) -> tuple[int, float]:
@@ -31,11 +111,17 @@ def l2_normalize(vec: np.ndarray) -> np.ndarray:
     return vec / norm
 
 
-def embed_text(text: str, *, dim: int = 256) -> np.ndarray:
+def embed_text(
+    text: str,
+    *,
+    dim: int = 256,
+    token_min_len: int = 1,
+    use_english_stopwords: bool = False,
+) -> np.ndarray:
     """Embed text into a deterministic L2-normalized vector."""
 
     vec = np.zeros(dim, dtype=np.float32)
-    for tok in tokenize(text):
+    for tok in tokenize(text, min_token_len=token_min_len, use_english_stopwords=use_english_stopwords):
         idx, sign = _token_to_index_and_sign(tok, dim)
         vec[idx] += sign
     return l2_normalize(vec)

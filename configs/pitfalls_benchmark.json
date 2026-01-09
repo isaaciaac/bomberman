@@ -1,0 +1,35 @@
+{
+  "seed_path": "data/memory_pitfalls.json",
+  "embedding": {
+    "dim": 256,
+    "token_min_len": 3,
+    "use_english_stopwords": true
+  },
+  "retrieval": {
+    "k": 3
+  },
+  "entropy": {
+    "epsilon": 0.35
+  },
+  "rewrite": {
+    "tmax": 6
+  },
+  "writeback": {
+    "enabled": false
+  },
+  "capacity": {
+    "enabled": false
+  },
+  "verifier": {
+    "enabled": true,
+    "require_no_unreconciled_conflicts": true,
+    "min_non_generated_atoms": 1,
+    "min_evidence_sim": 0.25,
+    "evidence_clip_cosine": true,
+    "min_evidence_token_overlap": 1,
+    "evidence_token_min_len": 3,
+    "evidence_use_english_stopwords": true,
+    "require_claim_keys_from_query": false,
+    "required_claim_keys": []
+  }
+}
