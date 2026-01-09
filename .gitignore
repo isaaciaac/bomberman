@@ -4,3 +4,4 @@ __pycache__/
 .venv/
 ark_api_key.txt
 paper/main.tex
+.vscode/
