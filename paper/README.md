@@ -1,1 +1,1 @@
-Chinese version of the manuscript.
+Chinese version of the manuscript and English Tex paper
