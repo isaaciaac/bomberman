@@ -1,0 +1,563 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+\title{An Entropy-Driven Memory-Reconstruction Cognitive Model\\
+(English-only arXiv Version)}
+\author{Hongyou Wang\thanks{Email: \texttt{zippy618@msn.com}.}}
+\date{}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\calM}{\mathcal{M}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Modern large language models (LLMs) implicitly treat ``answer generation'' as the core of reasoning.
+In contrast, humans often detect that their current cognitive state is \emph{not yet expressible}
+(\emph{``I have not thought it through''}) before producing language.
+This paper formalizes that pre-linguistic capability as an explicit mechanism.
+We define a system state as a query $q$ coupled with a finite candidate memory set $M$;
+the natural-language answer is \emph{excluded} from the system state.
+An \emph{expressibility entropy} $E(q,M)$ measures whether the current state can be safely expressed.
+When $E(q,M)$ is above a threshold, the system enters a System~2 (S2) loop that performs a single
+allowed operation, \textsc{REWRITE}, which \emph{adds new structural memory} so that $E(q,M)$ strictly decreases.
+Language generation is invoked only after the state enters an \emph{expressible region}.
+To make the framework engineering-testable, we also describe a scorable validation protocol that evaluates
+the decision to \emph{express} versus \emph{refuse}, and the auditable citation of supporting memory atoms,
+instead of judging free-form answer text.
+We also introduce a ``virtual environment'' training interface that learns which structural rewrites
+tend to reduce entropy, and a long-run ``memory entropy conservation'' constraint that prevents uncontrolled
+memory growth via abstraction and compression rather than deletion.
+\end{abstract}
+
+\vspace{0.5em}
+\noindent\textbf{Supplementary material (Chinese).}
+A full Chinese version of the manuscript is available as an external supplement:
+\url{https://github.com/isaaciaac/bomberman/blob/main/paper/Paper_cn.pdf}
+
+\section{Model viewpoint}
+
+\paragraph{State and phases.}
+A single inference task is triggered by a query $q \in Q$.
+The system maintains a finite candidate memory set $M_t \subseteq \calM$ and an entropy value
+$e_t = E(q,M_t)$.
+The overall pipeline is:
+\[
+\text{S1 retrieval} \;\rightarrow\; \text{Entropy discrimination} \;\rightarrow\;
+\text{S2 structural loop (if needed)} \;\rightarrow\; \text{Language generation}.
+\]
+S1 is a fast retrieval stage; S2 is \emph{not} ``slower answer generation'' but a
+\emph{structural processing} stage that modifies memory structure so the system becomes expressible.
+
+
+\paragraph{Memory atom.}
+We represent each memory item as a structured tuple
+\begin{equation}
+\label{eq:memory-atom}
+m_i = (q_i, v_i, z_i, c_i, s_i, \eta_i) \in \calM,
+\end{equation}
+where $q_i$ is the cue/query pattern, $v_i$ is the assertion/value content, $z_i$ is its vector embedding,
+$c_i>0$ is the structural cost, and $s_i\in[-1,1]$ is a signed direction that can support ($s_i>0$) or suppress ($s_i<0$)
+an inference path. $\eta_i$ is optional metadata (e.g., conflict keys, reconciliation records, rewrite bookkeeping).
+In most sections we only require that each $m_i$ has an embedding $z_i$ and a cost $c_i$.
+In an implementation, each memory atom can additionally carry a stable identifier used for audit logs and set signatures;
+this identifier is a handle and does not change the formal state definition.
+
+\paragraph{Entropy discriminator.}
+The entropy discriminator is a function
+\begin{equation}
+\label{eq:entropy-discriminator}
+E:\; Q \times \mathcal{P}_{\mathrm{fin}}(\calM) \rightarrow \R_{\ge 0},
+\end{equation}
+where $\mathcal{P}_{\mathrm{fin}}(\calM)$ denotes the family of finite subsets of $\calM$.
+It maps the current structural state $(q,M)$ to a nonnegative \emph{expressibility entropy} $E(q,M)$.
+Crucially, the input to $E$ does \emph{not} include any answer text or language-model output.
+
+We use a three-term decomposition:
+\begin{equation}
+\label{eq:entropy-decomposition}
+E(q,M) \;=\; \alpha\,E_{\mathrm{cov}}(q,M) \;+\; \beta\,E_{\mathrm{conf}}(M) \;+\; \gamma\,E_{\mathrm{stab}}(q,M),
+\qquad
+\alpha,\beta,\gamma \ge 0,\;\; \alpha+\beta+\gamma=1.
+\end{equation}
+$E_{\mathrm{cov}}$ penalizes insufficient coverage (low relevance between $q$ and $M$),
+$E_{\mathrm{conf}}$ penalizes internal inconsistency within $M$,
+and $E_{\mathrm{stab}}$ penalizes historically unstable structures (defined via $p_{\mathrm{succ}}$ in
+Eqs.~\eqref{eq:stability-map}--\eqref{eq:stab-entropy}).
+Concrete, engineering-friendly forms for $E_{\mathrm{cov}}$ and $E_{\mathrm{conf}}$ are given in Appendix~\ref{app:entropy-components}.
+
+\paragraph{Expressible region.}
+Define an expressible region:
+\begin{equation}
+\label{eq:expressible-region}
+R_{\varepsilon} \;=\; \{(q,M)\;|\;E(q,M) \le \varepsilon\}.
+\end{equation}
+If $(q,M_t)\in R_{\varepsilon}$, the system stops S2 and moves to language generation.
+
+\section{Stability mapping and historical success}
+
+Even if a new structure appears locally reasonable, it may fail repeatedly across history.
+We introduce a stability mapping that estimates the probability of success under bounded entropy:
+\begin{equation}
+\label{eq:stability-map}
+H(\mathrm{cluster}(q),\mathrm{sig}(M)) \;\mapsto\; p_{\mathrm{succ}} \in [0,1].
+\end{equation}
+\begin{itemize}[leftmargin=1.3em]
+\item $\mathrm{cluster}(q)$: similarity-based clustering/bucketing for queries to reduce overfitting;
+\item $\mathrm{sig}(M)$: an order-invariant signature of the set $M$ (e.g., an ID-sorted signature or approximate signature);
+\item $p_{\mathrm{succ}}$: empirical success probability that the system reaches $E(q,M)\le \varepsilon$ within bounded steps.
+\end{itemize}
+Define stability entropy:
+\begin{equation}
+\label{eq:stab-entropy}
+E_{\mathrm{stab}}(q,M) = 1 - p_{\mathrm{succ}}.
+\end{equation}
+If no historical record exists, use a prior $p_0\in (0,1)$.
+After each inference run, update by exponential moving average:
+\begin{equation}
+\label{eq:psucc-update}
+p_{\mathrm{succ}} \leftarrow (1-\eta)\,p_{\mathrm{succ}} + \eta\cdot \I[\mathrm{success}],
+\end{equation}
+where $\eta$ is the step size and $\I[\mathrm{success}]\in\{0,1\}$ is the success indicator.
+
+\section{System 2 as entropy-driven \textsc{REWRITE}}
+
+\subsection{Definition (S2 is not ``slow answer generation'')}
+In this model, S2 is a state-evolution mechanism whose objective is to reduce expressibility entropy
+when the system is not yet expressible. Formally, at step $t$, S2 receives:
+\[
+q \in Q,\qquad M_t \subseteq \calM,\qquad e_t = E(q,M_t),
+\]
+with the precondition $E(q,M_t) > \varepsilon$.
+
+\subsection{Output and action space}
+S2 outputs a finite set of \emph{new} memories:
+\begin{equation}
+\Delta M_t = \{m_1,\ldots,m_k\},\quad k\ge 0.
+\end{equation}
+Each $m_j$ is a new ``qv'' memory primitive.
+Key properties:
+\begin{itemize}[leftmargin=1.3em]
+\item S2 may output $\Delta M_t=\varnothing$ (meaning no feasible entropy-decreasing direction found);
+\item S2 does not output an answer text;
+\item S2's output is merged into the system state rather than immediately expressed.
+\end{itemize}
+
+S2 allows only one type of operation: \textsc{REWRITE}.
+This means:
+\begin{itemize}[leftmargin=1.3em]
+\item existing memory is not deleted;
+\item existing memory content is not directly modified;
+\item only new structure can be added to shift the overall state.
+\end{itemize}
+
+\subsection{Monotone expansion principle}
+The system state evolves by set union:
+\begin{equation}
+\label{eq:monotone}
+M_{t+1} = M_t \cup \Delta M_t.
+\end{equation}
+Motivations include cognitive consistency (humans rarely ``delete'' knowledge to reason), dynamical stability,
+and engineering traceability.
+
+\subsection{Entropy descent constraint (hard constraint)}
+For any \textsc{REWRITE}, the output must satisfy:
+\begin{equation}
+\label{eq:entropy-descent}
+E(q, M_t \cup \Delta M_t) < E(q, M_t).
+\end{equation}
+This is a necessary condition (and a soft objective in practice): \textsc{REWRITE} does not require that the
+new structure is logically complete or linguistically polished; it must improve expressibility in the entropy sense.
+
+\subsection{Two sources of \textsc{REWRITE}}
+\paragraph{Template-driven (\emph{experience mode}).}
+If reusable structural templates exist, \textsc{REWRITE} can directly apply them:
+\[
+m_{\mathrm{new}} = \ell(q,M_t),
+\]
+where $\ell$ denotes a mapping rule learned from history or virtual-environment training, representing a verified
+entropy-reducing direction.
+
+\paragraph{Search-driven (\emph{structural search mode}).}
+If no template matches, S2 explores candidates by restructuring $M_t$ and evaluates them:
+\begin{equation}
+\label{eq:search-rewrite}
+\Delta M_t \;=\; \arg\min_{\Delta M\in C(q,M_t)} E(q, M_t \cup \Delta M),
+\end{equation}
+where $C(q,M_t)$ is a feasible candidate set constrained by engineering limits (candidate count, depth, etc.).
+Global optimality is not required; local descent suffices.
+
+\subsection{Failure and termination}
+S2 is considered unable to continue if either:
+\begin{itemize}[leftmargin=1.3em]
+\item for all generatable $\Delta M$, $E(q,M_t \cup \Delta M)\ge E(q,M_t)$; or
+\item the maximum iteration count is reached: $t = T_{\max}$.
+\end{itemize}
+In such cases the system may stop and refuse to answer, or mark $(q,M_t)$ as a high-risk path for stability updates.
+
+\subsection{Relationship to long-term memory}
+New memories $\Delta M_t$ have a dual role:
+\begin{itemize}[leftmargin=1.3em]
+\item short-term: immediately shift the current state to reduce entropy;
+\item long-term: if repeatedly validated, they can be merged into the long-term memory base $\calM$ to speed up S1 in the future.
+\end{itemize}
+
+\subsection{Why S2 must converge or terminate}
+Under the monotone expansion principle, the entropy descent constraint, the lower bound $E\ge 0$,
+and the bounded step budget $T_{\max}$, the S2 loop cannot run forever: it either reaches the expressible region
+or terminates with failure.
+
+\section{Main pipeline: from input to expression}
+
+\subsection{Formal task description}
+A single task is triggered by $q\in Q$.
+The goal is not to generate an answer immediately but to construct a finite memory set $M^*$ such that:
+\[
+(q,M^*) \in R_{\varepsilon}.
+\]
+Language generation happens only after this condition is met.
+
+\subsection{Phase 1: S1 initialization (fast association)}
+System~1 is a stateless retrieval operator:
+\begin{equation}
+S_1: Q \to \mathcal{P}_{\mathrm{fin}}(\calM),
+\end{equation}
+returning an initial candidate set:
+\[
+M_0 = S_1(q).
+\]
+S1 is responsible for fast recall only; it does not optimize entropy, guarantee coverage, or resolve conflicts.
+Engineering-wise, S1 can be implemented via vector similarity search, inverted indexes, or rules.
+
+\subsection{Phase 2: entropy discrimination and phase switching}
+Compute:
+\[
+e_t = E(q,M_t).
+\]
+If $e_t\le \varepsilon$, the system is expressible and goes to language generation.
+If $e_t>\varepsilon$, the system enters the S2 loop.
+
+\subsection{Phase 3: S2 loop (REWRITE-driven)}
+At step $t$, the state is $(q,M_t,e_t)$.
+S2 proposes:
+\[
+\Delta M_t = R(q,M_t),
+\]
+which must satisfy Eq.~\eqref{eq:entropy-descent}.
+Update by Eq.~\eqref{eq:monotone} and recompute $e_{t+1}$.
+
+\subsection{Pseudo-code}
+\begin{verbatim}
+t <- 0
+M0 <- S1(q)
+
+while (E(q, Mt) > eps) and (t < Tmax):
+    DeltaMt <- R(q, Mt)          # REWRITE proposal
+    if DeltaMt is empty:
+        break                   # failure termination
+    Mt+1 <- Mt union DeltaMt
+    t <- t + 1
+
+# success termination: E(q, Mt) <= eps
+# failure termination: t == Tmax or DeltaMt empty
+\end{verbatim}
+
+\subsection{Phase 4: language generation (expression stage)}
+If S2 terminates successfully, obtain:
+\[
+M^* = M_t,\qquad E(q,M^*)\le \varepsilon.
+\]
+Then invoke a language generator:
+\[
+G: Q \times \mathcal{P}_{\mathrm{fin}}(\calM) \to Y,
+\qquad y = G(q,M^*).
+\]
+The generator does not participate in $E$ computation and does not trigger \textsc{REWRITE};
+reasoning and expression are decoupled.
+
+\subsection{Memory write-back (optional)}
+After one run, the system may write back part of new memory to long-term storage:
+\begin{equation}
+\label{eq:writeback}
+\calM \leftarrow \calM \cup \widehat{M},
+\qquad \widehat{M} \subseteq (M^* \setminus M_0).
+\end{equation}
+Possible conditions include: repeated appearance across tasks, significant average entropy reduction, and
+validation via virtual environments or real tasks.
+
+\subsection{Properties of the pipeline}
+\begin{itemize}[leftmargin=1.3em]
+\item \textbf{Termination:} entropy descent + lower bound + bounded steps;
+\item \textbf{Controllability:} parameters $\varepsilon, T_{\max}$ (and other weights in $E$) tune conservativeness;
+\item \textbf{Modular decoupling:} retrieval, S2 structural processing, and generation have clear boundaries;
+\item \textbf{Evolvability:} validated S2 structures can migrate into S1-accessible experience.
+\end{itemize}
+
+\section{Engineering validation: a scorable protocol}
+
+The paper-level definitions above are intentionally model-agnostic, but this creates an engineering challenge:
+without an explicit validation interface, it is easy to build ``entropy reduction'' mechanisms that appear to work
+yet are not externally verifiable (e.g., by adding a self-referential bridge memory that trivially increases coverage).
+This section describes a minimal, objective protocol that makes the framework testable without requiring a specific
+language model or a human evaluator.
+
+\subsection{Trace output (auditable state evolution)}
+For each query $q$, the system emits a machine-readable trace containing:
+(i) the retrieved initial set $M_0=S_1(q)$, (ii) the full S2 trajectory $\{(M_t,\Delta M_t,E(q,M_t))\}$,
+and (iii) the final decision: \emph{express} (success) or \emph{refuse} (failure), with termination reasons.
+The trace makes the monotone expansion constraint (Eq.~\eqref{eq:monotone}) and strict entropy descent
+(Eq.~\eqref{eq:entropy-descent}) directly checkable.
+
+\subsection{External verifier (preventing degenerate bridges)}
+Introduce an external, deterministic verifier:
+\[
+V:\; Q \times \mathcal{P}_{\mathrm{fin}}(\calM) \to \{0,1\}.
+\]
+In engineering evaluation, the system is allowed to enter expression only if both
+$E(q,M)\le \varepsilon$ and $V(q,M)=1$ hold.
+The verifier is intentionally conservative and focuses on \emph{structural} evidence rather than answer quality.
+One practical design is:
+\begin{itemize}[leftmargin=1.3em]
+\item \textbf{Evidence requirement:} $M$ must contain at least one non-generated memory atom that matches a required claim key
+(e.g., a parseable \texttt{FACT:key=value}) with sufficient similarity to $q$;
+\item \textbf{Conflict safety:} if $M$ contains unreconciled strong conflicts, then $V(q,M)=0$.
+\end{itemize}
+This prevents a synthetic \textsc{REWRITE} such as ``BRIDGE: restate query'' from passing the gate on its own.
+
+\subsection{Task suite (objective expectations)}
+Define a task instance as a tuple:
+\[
+\tau = (q,\varepsilon,T_{\max},\mathcal{M},\text{expected}),
+\]
+where \texttt{expected} specifies objective outcomes such as:
+(i) whether the run should \emph{refuse} or \emph{express}, (ii) whether S2 is expected to be invoked, and
+(iii) which memory claims (keys or atom identifiers) must be present in the final $M^*$.
+Scoring compares the emitted trace against these expectations, without judging natural-language answer text.
+
+\subsection{Baseline comparison (Transformer as ``decide+cite'')}
+To compare with a Transformer baseline without conflating generation quality, we use a constrained output format:
+for each task, the baseline must output (a) a binary decision \emph{answer/refuse} and (b) a set of cited memory atom
+identifiers \emph{selected only from} the task's retrieved $M_0$.
+The evaluator then scores both systems under the same objective criteria.
+This supports additional engineering metrics such as an ``unsafe answer'' rate: answering when the initial state
+fails the expressibility gate (e.g., $E(q,M_0)>\varepsilon$ or $V(q,M_0)=0$), which captures over-eager expression.
+
+\subsection{Reference results (accompanying implementation)}
+An accompanying minimal implementation instantiates this protocol with a deterministic embedding, a rule-based conflict
+indicator, and a small benchmark suite. The benchmark includes ``pitfall'' cases that are common in practice:
+missing-fact temptation (should refuse), strong conflicts (should not express until mediated), and citation discipline
+(citations restricted to retrieved $M_0$).
+In one reference run on the included 100-task pitfalls suite, the cognitive core achieves $100/100$ under the protocol,
+while a DeepSeek-V3.2 baseline achieves $88/100$ and has a safety-style pass rate of $78/100$ under the definition above.
+These numbers are reported only to demonstrate that the protocol yields externally checkable metrics; they are not
+intended as general performance claims.
+
+\section{Virtual environment: training ``entropy descent'' rather than answers}
+
+\subsection{Role of the virtual environment}
+The virtual environment is not a world simulator. It is a mechanism that produces
+\textbf{structure--entropy evolution trajectories}, so the system can learn which structural actions
+tend to reduce entropy under future conditions.
+
+\subsection{Formal definition}
+Define a virtual environment as a 4-tuple:
+\begin{equation}
+\mathcal{E}_{\mathrm{env}} = (X,A,f,g),
+\end{equation}
+where:
+\begin{itemize}[leftmargin=1.3em]
+\item $X$: state space (may encode symbolic structures, constraint sets, relation graphs);
+\item $A$: action space (merge, conditionalize, bridge, abstract, etc.);
+\item $f: X\times A \to X$: transition function;
+\item $g: X \to O$: observation mapping.
+\end{itemize}
+We do not require $f$ to be reversible or deterministic.
+
+\subsection{From trajectories to experience memories}
+A run generates a trajectory:
+\[
+\tau = (x_0,a_0,x_1,a_1,\ldots,x_T).
+\]
+Trajectories are not directly injected into the reasoning system; they become raw material for abstraction.
+Define an experience abstraction operator:
+\[
+G_{\mathrm{env}}: \tau \to m_{\mathrm{env}},
+\]
+producing one or multiple qv memories:
+\begin{equation}
+m_{\mathrm{env}} = \langle q_{\mathrm{env}}, v_{\mathrm{env}}, z_{\mathrm{env}}, c_{\mathrm{env}}, s_{\mathrm{env}}, \eta_{\mathrm{env}}\rangle.
+\end{equation}
+Here:
+\begin{itemize}[leftmargin=1.3em]
+\item $c_{\mathrm{env}} \in (0,+\infty)$ or $[0,+\infty)$: post-write resource/capacity occupancy (consistent with $c_i$ later);
+\item $s_{\mathrm{env}}\in [-1,1]$: directionality value (support/avoid), consistent with later $s_i$.
+\item $\eta_{\mathrm{env}}$: optional metadata/tags (e.g., rewrite type, applicability conditions).
+\end{itemize}
+The key meaning of $m_{\mathrm{env}}$ is: ``under some structural conditions, a certain rewrite direction tends to work'',
+not ``what the final answer is''.
+
+\subsection{Environment entropy filtering (noise prevention)}
+Not all trajectories are worth writing back.
+Introduce an environment entropy score:
+\[
+E_{\mathrm{env}}(\tau),
+\]
+measuring whether the trajectory exhibits stable structural evolution and sustained entropy descent, and whether it can be
+compressed into a low-complexity experience.
+Define a write-in condition:
+\[
+E_{\mathrm{env}}(\tau) \le \varepsilon_{\mathrm{env}}.
+\]
+Only then can the generated $m_{\mathrm{env}}$ enter long-term memory.
+
+\subsection{Training objective}
+Training targets structural components rather than the language generator.
+The primary objective is to maximize the expected entropy reduction contributed by new structure:
+\begin{equation}
+\label{eq:train-obj}
+\max\; \mathbb{E}_{q,M}\big[\,E(q,M) - E(q, M \cup \{m_{\mathrm{env}}\})\,\big].
+\end{equation}
+Intuitively, if an experience works across many structural states it yields higher expected benefit; if it is only valid for
+isolated trajectories the benefit averages out.
+
+\subsection{How training feeds back into the main pipeline}
+Virtual-environment training affects the main pipeline by:
+\begin{itemize}[leftmargin=1.3em]
+\item strengthening S1: validated experiences enter long-term memory so S1 can retrieve near-expressible initial structures;
+\item improving \textsc{REWRITE}: experience-mode templates $\ell$ become richer and more reliable.
+\end{itemize}
+
+\section{Memory entropy conservation: long-run stability constraint}
+
+\subsection{Motivation}
+In continual-learning systems with write-back, the most intuitive risk is not inference failure but memory collapse:
+redundant and low-value memory accumulates, increasing retrieval and reasoning cost until the system degrades or ``drowns''.
+
+\subsection{Definition (not the number of items)}
+Memory entropy is not the count $|\calM|$.
+Each memory $m_i$ carries a resource weight:
+\[
+c_i > 0,
+\]
+which jointly captures storage cost, retrieval impact, interference, and long-term maintenance complexity.
+Define:
+\begin{equation}
+S(\calM) = \sum_{m_i\in \calM} c_i,
+\qquad
+S(\calM) \le C,
+\end{equation}
+where $C$ is the maximum capacity budget acceptable in engineering practice.
+
+\subsection{No deletion, but directional rewrite and abstraction}
+The principle is: memory form may change, but uncontrolled growth is forbidden.
+Instead of deletion, the system uses abstraction/compression.
+When the system detects $S(\calM) > C$, it triggers an abstraction operator:
+\[
+\mathcal{A}:\{m_1,\ldots,m_k\} \to m_{\mathrm{abs}},
+\qquad
+c_{\mathrm{abs}} \le \sum_{j=1}^{k} c_j.
+\]
+Functionally, we require:
+\[
+\forall q,\;\; E(q, M \cup \{m_{\mathrm{abs}}\}) \approx E(q, M \cup \{m_1,\ldots,m_k\}),
+\]
+meaning the abstraction preserves the entropy-reduction capability of the original set while reducing structural complexity.
+
+\subsection{Directional memory}
+Memory items also have directionality:
+\[
+s_i \in [-1,1].
+\]
+Semantics:
+\begin{itemize}[leftmargin=1.3em]
+\item $s_i \approx 0$: almost useless/uncertain/not used for now;
+\item $s_i > 0$: prefer using (supportive memory);
+\item $s_i < 0$: avoid using (negative memory / prohibition / counterexample / trap warning);
+\item $|s_i|$: strength.
+\end{itemize}
+The capacity constraint applies to $c_i$ rather than $s_i$, allowing negative memories to coexist without breaking the budget.
+
+\subsection{Why conservation does not contradict learning}
+The constraint forces learning to become more efficient: the system must ``remember better'' instead of ``remember more''.
+This mirrors human cognition, where childhood has many fragments but many are compressed into higher-level concepts and intuitions
+while details are not entirely lost.
+
+\section{Limitations and outlook}
+
+This paper focuses on a formal architecture and constraints.
+A full implementation requires concrete definitions for the entropy function $E(q,M)$, the rewrite policy $R$, and the
+stability mapping $H$, as well as empirical evaluation on tasks that stress expressibility, contradiction, and long-horizon
+memory maintenance.
+
+\bibliographystyle{plain}
+
+\appendix
+\section{Concrete forms for coverage and conflict entropy}
+\label{app:entropy-components}
+
+This appendix provides one practical instantiation of $E_{\mathrm{cov}}$ and $E_{\mathrm{conf}}$ used in the paper.
+Other monotone variants are possible, as long as larger values correspond to higher structural risk.
+
+\paragraph{Coverage entropy.}
+Let $z_q=\phi_Q(q)$ be the embedding of the query, and for each memory item $m\in M$ let $z_m$ denote its embedding.
+Define
+\begin{equation}
+\label{eq:sim-max}
+\mathrm{sim}_{\max}(q,M)=
+\begin{cases}
+\max\limits_{m\in M}\cos(z_q,z_m), & M\neq\emptyset,\\
+0, & M=\emptyset,
+\end{cases}
+\end{equation}
+and
+\begin{equation}
+\label{eq:ecov}
+E_{\mathrm{cov}}(q,M)=1-\mathrm{sim}_{\max}(q,M).
+\end{equation}
+When negative cosine similarity is possible and a nonnegative, monotone score is preferred, use the clipped cosine
+\begin{equation}
+\label{eq:cos-plus}
+\cos^{+}(u,v)=\max\{0,\cos(u,v)\},
+\end{equation}
+and replace $\cos$ with $\cos^{+}$ in Eq.~\eqref{eq:sim-max}.
+
+\paragraph{Conflict entropy.}
+Let $\chi(m_i,m_j)\in\{0,1\}$ indicate whether two memory items are considered in strong conflict under the current system context.
+Define
+\begin{equation}
+\label{eq:econf}
+E_{\mathrm{conf}}(M)=
+\begin{cases}
+\frac{1}{|M|(|M|-1)}\sum\limits_{i\neq j}\chi(m_i,m_j), & |M|\ge 2,\\
+0, & |M|<2.
+\end{cases}
+\end{equation}
+The indicator $\chi$ can be implemented by rules, learned classifiers, or constrained rewriting policies; the model only
+requires that higher values imply higher internal inconsistency.
+
+
+\begin{thebibliography}{9}
+\bibitem{kahneman2011}
+Daniel Kahneman.
+\newblock \emph{Thinking, Fast and Slow}.
+\newblock Farrar, Straus and Giroux, 2011.
+
+\bibitem{vaswani2017}
+Ashish Vaswani et al.
+\newblock Attention is all you need.
+\newblock In \emph{NeurIPS}, 2017.
+
+\bibitem{lewis2020rag}
+Patrick Lewis et al.
+\newblock Retrieval-augmented generation for knowledge-intensive {NLP} tasks.
+\newblock In \emph{NeurIPS}, 2020.
+\end{thebibliography}
+
+\end{document}
